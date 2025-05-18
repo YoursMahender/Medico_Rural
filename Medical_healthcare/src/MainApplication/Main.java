@@ -12,7 +12,12 @@ public class Main extends Application {
 	@SuppressWarnings("exports")
 	public void start( Stage stage) throws Exception
 	{
-	
+		 DatabaseConnection db = new DatabaseConnection();
+	        if (db.getConnection() != null) {
+	            System.out.println("Database connected successfully");
+	        } else {
+	            System.out.println("Database connection failed");
+	        }
 		Parent parent = FXMLLoader.load(getClass().getResource("welcomePage.fxml"));
 		
 		Scene scene= new Scene(parent);

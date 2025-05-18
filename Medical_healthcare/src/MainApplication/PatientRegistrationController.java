@@ -7,6 +7,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 
+
+
 public class PatientRegistrationController {
 
     @FXML
@@ -45,10 +47,20 @@ public class PatientRegistrationController {
         genderCombo.getValue();
         phoneField.getText();
         addressField.getText();
+        usernamefield.getText();
+        passwordfield.getText();
+
+
 
         // Save to database logic here
         Alert alert = new Alert(Alert.AlertType.INFORMATION, "Patient registered successfully!");
         alert.show();
+        
+        
     }
-
+    
+    
+    
+  
 }
+

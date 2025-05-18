@@ -1,7 +1,6 @@
 package MainApplication;
 
 import java.io.IOException;
-
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -53,6 +52,8 @@ public class loginController {
             System.out.println("Invalid credentials!");
             }
             }
+    
+    
         
         @FXML
      public void registerButtonClicked(ActionEvent event) throws IOException {
@@ -67,4 +68,5 @@ public class loginController {
         	}
     
 }
+		
     }
