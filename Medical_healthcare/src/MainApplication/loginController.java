@@ -50,9 +50,19 @@ public class loginController {
 
     
     @FXML
-    private void loginButtonClicked() {
+    private void loginButtonClicked(ActionEvent event) throws IOException {
         String username = usernameField.getText();
         String password = passwordField.getText();
+        
+        try {
+    	    Parent root = FXMLLoader.load(getClass().getResource("patientPage.fxml"));
+    	   
+			Stage stage = new Stage();
+			stage.setScene(new Scene(root));
+    	    stage.show();
+    	} catch (IOException e) {
+    	    e.printStackTrace();
+    	}
 
         boolean valid = validateLogin(username, password);
         if (valid) {

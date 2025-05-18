@@ -16,7 +16,7 @@
       </Label>
       <ImageView fitHeight="178.0" fitWidth="239.0" layoutX="55.0" layoutY="140.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../../../../Downloads/medico.jpg" />
+            <Image url="@../../../../../Downloads/medico.jpg" />
          </image>
       </ImageView>
       <Button fx:id="continuebutton" layoutX="117.0" layoutY="440.0" mnemonicParsing="false" onAction="#ContinuebuttonListener" prefHeight="26.0" prefWidth="114.0" text="Continue" textFill="#0a0214" />
