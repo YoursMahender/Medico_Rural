@@ -1,10 +1,14 @@
 package MainApplication;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -25,33 +29,39 @@ public class loginController {
     @FXML
     private TextField usernameField;
 
-    public void loginButtonClicked(ActionEvent event) throws IOException {
+
+    public boolean validateLogin(String username, String password) {
+        String sql = "SELECT * FROM patients WHERE username = ? AND password = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, username);
+            stmt.setString(2, password); // if stored as hashed, hash before comparing
+
+            ResultSet rs = stmt.executeQuery();
+            return rs.next(); // returns true if a match is found
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    
+    @FXML
+    private void loginButtonClicked() {
         String username = usernameField.getText();
         String password = passwordField.getText();
 
-        
-        if (username.equals("admin") && password.equals("1234")) {
-            // Successful login
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("main.fxml"));
-            Parent root = loader.load();
-
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-
-            // Set preferred size
-            stage.setWidth(600);
-            stage.setHeight(479);
-            stage.setResizable(false);
-
-            stage.show();
+        boolean valid = validateLogin(username, password);
+        if (valid) {
+            System.out.println("Login successful!");
+        } else {
+            System.out.println("Invalid username or password.");
         }
-        
-        else {
-            // Failed login
-            System.out.println("Invalid credentials!");
-            }
-            }
+    }
+
     
     
         

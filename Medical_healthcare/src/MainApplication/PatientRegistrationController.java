@@ -1,5 +1,9 @@
 package MainApplication;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -40,27 +44,64 @@ public class PatientRegistrationController {
     }
 
 
-    @FXML
-   public  void handleRegister(ActionEvent event) {
-    	nameField.getText();
-        ageField.getText();
-        genderCombo.getValue();
-        phoneField.getText();
-        addressField.getText();
-        usernamefield.getText();
-        passwordfield.getText();
-
-
-
-        // Save to database logic here
-        Alert alert = new Alert(Alert.AlertType.INFORMATION, "Patient registered successfully!");
-        alert.show();
+    
         
+        public boolean registerPatient(String name, String username, String password, int age ,String gender, String phone, String address) {
+            String sql = "INSERT INTO patients (name, username, password,age, gender, phone, address) VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+            try (Connection conn = DatabaseConnection.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+                stmt.setString(1, name);
+                stmt.setString(2, username);
+                stmt.setString(3, password); // you can hash this before storing
+                stmt.setInt(4, age);
+                stmt.setString(5, gender);
+                stmt.setString(6, phone);
+                stmt.setString(7, address);
+                
+                
+
+                int rowsInserted = stmt.executeUpdate();
+                return rowsInserted > 0;
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
         
-    }
-    
-    
-    
-  
+        @FXML
+        private void handleRegister() {
+            String name = nameField.getText();
+            String username = usernamefield.getText();
+            String password = passwordfield.getText();
+            String gender = genderCombo.getValue();
+            String phone = phoneField.getText();
+            String address = addressField.getText();
+            int age = Integer.parseInt(ageField.getText());
+
+            boolean success = registerPatient(name, username, password, age,  gender, phone, address);
+            if (success) {
+                System.out.println("Patient registered successfully.");
+                Alert alert = new Alert(Alert.AlertType.INFORMATION, "Patient registered successfully!");
+                alert.show();
+            } else {
+                System.out.println("Registration failed.");
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Registration failed. Try again.");
+                alert.show();
+            }
+        } 
 }
+        
+
+
+
+//        // Save to database logic here
+//        Alert alert = new Alert(Alert.AlertType.INFORMATION, "Patient registered successfully!");
+//        alert.show();
+//        
+        
+ 
+  
 
