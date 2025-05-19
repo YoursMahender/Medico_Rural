@@ -1,16 +1,24 @@
 package MainApplication;
 
-import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.scene.control.cell.PropertyValueFactory;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
+import utils.NotificationUtil;
 
 public class PatientPageController {
 
@@ -40,14 +48,17 @@ public class PatientPageController {
 
     private ObservableList<MedicalHistory> historyList = FXCollections.observableArrayList();
 
-   
-   
+    @FXML
+    public void initialize() {
+        // Configure table columns
+        dateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
+        descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 
-//        // Load dummy data
-//        historyList.add(new MedicalHistory(LocalDate.of(2024, 4, 12), "Routine Check-up"));
-//        historyList.add(new MedicalHistory(LocalDate.of(2024, 5, 10), "Blood Test"));
-//        historyTable.setItems(historyList);
-    
+        // Load dummy data
+        historyList.add(new MedicalHistory(LocalDate.of(2024, 4, 12), "Routine Check-up"));
+        historyList.add(new MedicalHistory(LocalDate.of(2024, 5, 10), "Blood Test"));
+        historyTable.setItems(historyList);
+    }
     @FXML
     private String loggedInUsername;
     
@@ -55,6 +66,7 @@ public class PatientPageController {
         this.loggedInUsername = username;
         welcomeLabel.setText("Welcome, " + username + "!");
         loadMedicalHistory(username);
+        
     }
 
     @FXML
@@ -71,7 +83,9 @@ public class PatientPageController {
         }
 
         try (Connection conn = DatabaseConnection.getConnection()) {
-            String sql = "INSERT INTO appointments (patient_username, doctor_name, appointment_date, problem) VALUES (?, ?, ?, ?)";
+        	conn.setAutoCommit(false);
+        	
+        	String sql = "INSERT INTO appointments (patient_username, doctor_name, appointment_date, problem) VALUES (?, ?, ?, ?)";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, loggedInUsername);
             stmt.setString(2, doctor);
@@ -85,8 +99,46 @@ public class PatientPageController {
                 bookingMessage.setTextFill(javafx.scene.paint.Color.GREEN);
 
             } 
+            
+            NotificationUtil.showSuccess("Your appointment has been booked successfully!");
+           
+//            String patientEmail = null;
+//            String fetchEmailSql = "SELECT email FROM patients WHERE username = ?";
+//            try (PreparedStatement emailStmt = conn.prepareStatement(fetchEmailSql)) {
+//                emailStmt.setString(1, loggedInUsername);
+//                ResultSet rs = emailStmt.executeQuery();
+//                if (rs.next()) {
+//                    patientEmail = rs.getString("email");
+//                }
+//            }
+//
+//            // Send email if email exists
+//            if (patientEmail != null && !patientEmail.isEmpty()) {
+//            
+//            EmailService.sendEmail(
+//            	    patientEmail,
+//            	    "Appointment Confirmation",
+//            	    "Dear " + loggedInUsername + ",\n\nYour appointment with Dr. " + doctor + " on " + date + " is confirmed.\n\n- Your Clinic"
+//            	);
 
-        } catch (SQLException e) {
+            
+            // Insert into medical_history table
+            String historySql = "INSERT INTO medical_history (patient_username, visit_date, description) VALUES (?, ?, ?)";
+            try (PreparedStatement stmt1 = conn.prepareStatement(historySql)) {
+                stmt1.setString(1, loggedInUsername);
+                stmt1.setDate(2, java.sql.Date.valueOf(date));
+                stmt1.setString(3, "Appointment with Dr. " + doctor + " - " + problem);
+                stmt1.executeUpdate();
+            }
+
+            conn.commit(); 
+            NotificationUtil.showInfo("Medical History Updated", "A new record has been added to your medical history.");
+            
+            loadMedicalHistory(loggedInUsername);
+
+            
+        }
+            catch (SQLException e) {
             bookingMessage.setText("Failed to book appointment.");
             bookingMessage.setTextFill(javafx.scene.paint.Color.RED);
 //            e.printStackTrace();
@@ -97,27 +149,17 @@ public class PatientPageController {
         appointmentDate.setValue(null);
     }
 
-    @FXML
-    public void initialize() {
-        // Configure table columns
-        dateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
-        descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-   
-    }
 
-//    historyList.add(new MedicalHistory(LocalDate.of(2024, 4, 12), "Routine Check-up"));
-//  historyList.add(new MedicalHistory(LocalDate.of(2024, 5, 10), "Blood Test"));
-//  historyTable.setItems(historyList);
     @FXML
-    private void loadMedicalHistory(String patientusername) {
+    private void loadMedicalHistory(String patientUsername) {
         ObservableList<MedicalHistory> data = FXCollections.observableArrayList();
 
-        
-       
-            try (Connection conn = DatabaseConnection.getConnection()) {
-            String sql = "SELECT visit_date, description FROM medical_history WHERE patient_username = ?";
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1, patientusername);
+        String sql = "SELECT visit_date, description FROM medical_history WHERE patient_username = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, patientUsername);
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
@@ -129,7 +171,7 @@ public class PatientPageController {
             historyTable.setItems(data);
 
         } catch (SQLException e) {
-            showAlert("Error", "Could not load medical history.");
+            showAlert("Error", "Could not load medical history.\n" + e.getMessage());
             e.printStackTrace();
         }
     }
