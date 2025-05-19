@@ -47,6 +47,7 @@ public class loginController {
             return false;
         }
     }
+    
 
     
     @FXML
@@ -54,28 +55,49 @@ public class loginController {
         String username = usernameField.getText();
         String password = passwordField.getText();
         
-        try {
-    	    Parent root = FXMLLoader.load(getClass().getResource("patientPage.fxml"));
-    	   
-			Stage stage = new Stage();
-			stage.setScene(new Scene(root));
-    	    stage.show();
-    	} catch (IOException e) {
-    	    e.printStackTrace();
-    	}
+        if (username.isEmpty() || password.isEmpty()) {
+            showAlert("Error", "Username and Password cannot be empty!");
+            return;
+        }
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            String query = "SELECT * FROM patients WHERE username = ? AND password = ?";
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setString(1, username);
+            stmt.setString(2, password);
 
-        boolean valid = validateLogin(username, password);
-        if (valid) {
-            System.out.println("Login successful!");
-        } else {
-            System.out.println("Invalid username or password.");
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                // Successful login: open patient page
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("patientpage.fxml"));
+                Parent root = loader.load();
+
+                // Pass user info to controller (optional)
+                PatientPageController controller = loader.getController();
+                controller.setLoggedInUsername(username);
+
+                Stage stage = new Stage();
+                stage.setScene(new Scene(root));
+                stage.show();
+            } else {
+                showAlert("Login Failed", "Invalid username or password.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Error", "Database error occurred.");
         }
     }
-
     
     
         
-        @FXML
+        private void showAlert(String string, String string2) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+
+		@FXML
      public void registerButtonClicked(ActionEvent event) throws IOException {
         	try {
         	    Parent root = FXMLLoader.load(getClass().getResource("registration.fxml"));

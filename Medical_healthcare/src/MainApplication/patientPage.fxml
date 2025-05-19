@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="500" prefWidth="600" style="-fx-background-color: skyblue;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="MainApplication.PatientPageController">
+<AnchorPane prefHeight="500" prefWidth="632.0" style="-fx-background-color: skyblue;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="MainApplication.PatientPageController">
 
     <!-- Welcome Label -->
     <Label fx:id="welcomeLabel" layoutX="14.0" layoutY="14.0" prefHeight="36.0" prefWidth="165.0" style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Welcome, Patient!">
@@ -25,22 +25,25 @@
       </font></Label>
 
     <Label layoutX="20.0" layoutY="99.0" text="Date:" />
-    <DatePicker fx:id="appointmentDate" layoutX="72.0" layoutY="95.0" />
+    <DatePicker fx:id="appointmentDate" layoutX="72.0" layoutY="95.0" promptText="Date for appointment" />
 
     <Label layoutX="260.0" layoutY="99.0" text="Doctor:" />
     <TextField fx:id="doctorName" layoutX="312.0" layoutY="95.0" promptText="Enter doctor's name" />
 
-    <Button layoutX="500.0" layoutY="95.0" onAction="#handleBookAppointment" text="Book" />
+    <Label layoutX="20.0" layoutY="142.0" text="Problem:" />
+<TextField fx:id="problemField" layoutX="72.0" layoutY="138.0" prefHeight="26.0" prefWidth="407.0" promptText="Describe your issue" />
 
-    <Separator layoutX="0" layoutY="150" prefHeight="8.0" prefWidth="600" />
+<Button fx:id="bookingMessage" layoutX="485.0" layoutY="138.0" onAction="#handleBookAppointment" prefHeight="26.0" prefWidth="140.0" text="Book" />
+
+    <Separator layoutY="178.0" prefHeight="5.0" prefWidth="632.0" />
 
     <!-- Medical History Section -->
-    <Label layoutX="20" layoutY="170" text="Medical History:">
+    <Label layoutX="22.0" layoutY="186.0" text="Medical History:">
       <font>
          <Font size="14.0" />
       </font></Label>
 
-    <TableView fx:id="historyTable" layoutX="20" layoutY="200" prefHeight="250" prefWidth="560" style="-fx-background-color: yellow;">
+    <TableView fx:id="historyTable" layoutX="20.0" layoutY="224.0" prefHeight="250" prefWidth="560" style="-fx-background-color: yellow;">
         <columns>
             <TableColumn fx:id="dateColumn" prefWidth="150" text="Date" />
             <TableColumn fx:id="descriptionColumn" prefWidth="400" text="Description" />

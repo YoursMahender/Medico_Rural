@@ -9,7 +9,7 @@ import javafx.stage.Stage;
 public class Main extends Application {
 	
 	
-	@SuppressWarnings("exports")
+	@SuppressWarnings({ "exports", "static-access" })
 	public void start( Stage stage) throws Exception
 	{
 		 DatabaseConnection db = new DatabaseConnection();

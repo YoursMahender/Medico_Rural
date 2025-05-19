@@ -16,7 +16,7 @@
       </Label>
      
       <Button fx:id="continuebutton" layoutX="117.0" layoutY="440.0" mnemonicParsing="false" onAction="#ContinuebuttonListener" prefHeight="26.0" prefWidth="114.0" text="Continue" textFill="#0a0214" />
-      <ImageView fitHeight="194.0" fitWidth="287.0" layoutX="31.0" layoutY="120.0" pickOnBounds="true" preserveRatio="true">
+      <ImageView fitHeight="326.0" fitWidth="271.0" layoutX="39.0" layoutY="118.0" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="@../../../../../Downloads/medico.jpg" />
          </image>

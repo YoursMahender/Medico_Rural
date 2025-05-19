@@ -6,6 +6,10 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.cell.PropertyValueFactory;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 
 public class PatientPageController {
@@ -20,7 +24,10 @@ public class PatientPageController {
     private TextField doctorName;
 
     @FXML
-    private Label bookingMessage;
+    private TextField problemField;
+
+    @FXML
+    private Button bookingMessage;
 
     @FXML
     private TableView<MedicalHistory> historyTable;
@@ -33,59 +40,108 @@ public class PatientPageController {
 
     private ObservableList<MedicalHistory> historyList = FXCollections.observableArrayList();
 
-    @FXML
-    public void initialize() {
-        // Configure table columns
-        dateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
-        descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
+   
+   
 
-        // Load dummy data
-        historyList.add(new MedicalHistory(LocalDate.of(2024, 4, 12), "Routine Check-up"));
-        historyList.add(new MedicalHistory(LocalDate.of(2024, 5, 10), "Blood Test"));
-        historyTable.setItems(historyList);
+//        // Load dummy data
+//        historyList.add(new MedicalHistory(LocalDate.of(2024, 4, 12), "Routine Check-up"));
+//        historyList.add(new MedicalHistory(LocalDate.of(2024, 5, 10), "Blood Test"));
+//        historyTable.setItems(historyList);
+    
+    @FXML
+    private String loggedInUsername;
+    
+    public void setLoggedInUsername(String username) {
+        this.loggedInUsername = username;
+        welcomeLabel.setText("Welcome, " + username + "!");
+        loadMedicalHistory(username);
     }
 
     @FXML
     private void handleBookAppointment() {
         LocalDate date = appointmentDate.getValue();
         String doctor = doctorName.getText();
+        String problem = problemField.getText();
+//        String username = "your_logged_in_username"; // Replaces this with actual logic
 
-        if (date == null || doctor.isEmpty()) {
+        if (date == null || doctor.isEmpty() || problem.isEmpty()) {
             bookingMessage.setText("Please fill in all fields.");
             bookingMessage.setTextFill(javafx.scene.paint.Color.RED);
             return;
         }
 
-        // Simulate booking success
-        bookingMessage.setText("Appointment booked with Dr. " + doctor + " on " + date + ".");
-        bookingMessage.setTextFill(javafx.scene.paint.Color.GREEN);
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            String sql = "INSERT INTO appointments (patient_username, doctor_name, appointment_date, problem) VALUES (?, ?, ?, ?)";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, loggedInUsername);
+            stmt.setString(2, doctor);
+            stmt.setDate(3, java.sql.Date.valueOf(date));
+            stmt.setString(4, problem);
 
-        // Optionally clear fields
+            int rowsInserted = stmt.executeUpdate();
+
+            if (rowsInserted > 0) {
+                bookingMessage.setText("Appointment booked successfully!");
+                bookingMessage.setTextFill(javafx.scene.paint.Color.GREEN);
+
+            } 
+
+        } catch (SQLException e) {
+            bookingMessage.setText("Failed to book appointment.");
+            bookingMessage.setTextFill(javafx.scene.paint.Color.RED);
+//            e.printStackTrace();
+        }
+        
         doctorName.clear();
+        problemField.clear();
         appointmentDate.setValue(null);
     }
 
-    // Optional: Set the username to customize welcome message
-    public void setUsername(String username) {
-        welcomeLabel.setText("Welcome, " + username + "!");
+    @FXML
+    public void initialize() {
+        // Configure table columns
+        dateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
+        descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
+   
     }
 
-    // Inner class for medical history
-    public static class MedicalHistory {
-        private LocalDate date;
-        private String description;
+//    historyList.add(new MedicalHistory(LocalDate.of(2024, 4, 12), "Routine Check-up"));
+//  historyList.add(new MedicalHistory(LocalDate.of(2024, 5, 10), "Blood Test"));
+//  historyTable.setItems(historyList);
+    @FXML
+    private void loadMedicalHistory(String patientusername) {
+        ObservableList<MedicalHistory> data = FXCollections.observableArrayList();
 
-        public MedicalHistory(LocalDate date, String description) {
-            this.date = date;
-            this.description = description;
-        }
+        
+       
+            try (Connection conn = DatabaseConnection.getConnection()) {
+            String sql = "SELECT visit_date, description FROM medical_history WHERE patient_username = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, patientusername);
+            ResultSet rs = stmt.executeQuery();
 
-        public LocalDate getDate() {
-            return date;
-        }
+            while (rs.next()) {
+                LocalDate date = rs.getDate("visit_date").toLocalDate();
+                String desc = rs.getString("description");
+                data.add(new MedicalHistory(date, desc));
+            }
 
-        public String getDescription() {
-            return description;
+            historyTable.setItems(data);
+
+        } catch (SQLException e) {
+            showAlert("Error", "Could not load medical history.");
+            e.printStackTrace();
         }
     }
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION, message, ButtonType.OK);
+        alert.setTitle(title);
+        alert.showAndWait();
+    }
+
+	public void setWelcomeMessage(String string) {
+		// TODO Auto-generated method stub
+		
+	}
 }
