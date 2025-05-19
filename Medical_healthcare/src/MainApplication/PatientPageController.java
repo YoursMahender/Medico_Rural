@@ -102,24 +102,6 @@ public class PatientPageController {
             
             NotificationUtil.showSuccess("Your appointment has been booked successfully!");
            
-//            String patientEmail = null;
-//            String fetchEmailSql = "SELECT email FROM patients WHERE username = ?";
-//            try (PreparedStatement emailStmt = conn.prepareStatement(fetchEmailSql)) {
-//                emailStmt.setString(1, loggedInUsername);
-//                ResultSet rs = emailStmt.executeQuery();
-//                if (rs.next()) {
-//                    patientEmail = rs.getString("email");
-//                }
-//            }
-//
-//            // Send email if email exists
-//            if (patientEmail != null && !patientEmail.isEmpty()) {
-//            
-//            EmailService.sendEmail(
-//            	    patientEmail,
-//            	    "Appointment Confirmation",
-//            	    "Dear " + loggedInUsername + ",\n\nYour appointment with Dr. " + doctor + " on " + date + " is confirmed.\n\n- Your Clinic"
-//            	);
 
             
             // Insert into medical_history table
